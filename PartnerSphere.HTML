@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PartnerSphere | Hub</title>
+    <style>
+        :root {
+            --primary-bg: #aaa6de;
+            --curtain-color: #b8b4e7;
+            --glass: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --bounce: cubic-bezier(0.8, 0, 0.1, 1);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            font-family: sans-serif;
+            background-color: var(--primary-bg);
+        }
+
+        /* --- SELECTION PAGE --- */
+        #page-selection {
+            position: relative; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 60px;
+            z-index: 5; transition: transform 1s var(--bounce);
+        }
+
+        .main-logo { max-width: 420px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); }
+        .button-row { display: flex; gap: 30px; }
+
+        .sphere-btn {
+            width: 140px; height: 140px; border-radius: 35px; cursor: pointer;
+            background: var(--glass); backdrop-filter: blur(10px); border: 2px solid var(--border);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; padding: 0;
+        }
+
+        .sphere-btn:hover { transform: translateY(-20px) scale(1.1); border-color: white; }
+        .sphere-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- THEATER PAGE --- */
+        #page-theater {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; opacity: 0; transform: translateY(30px);
+            transition: all 1s var(--bounce); pointer-events: none;
+        }
+
+        .is-theater-active #page-theater { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        .video-container {
+            width: 85vw; max-width: 1100px; aspect-ratio: 16/9;
+            background: #000; border-radius: 60px; box-shadow: 0 80px 120px -40px rgba(0,0,0,1);
+            overflow: hidden; cursor: pointer; margin-top: -30px;
+        }
+
+        #media-source { width: 100%; height: 100%; background-image: url('Static.gif'); background-size: cover; background-position: center; }
+
+        /* --- RED GLITCH BUTTON --- */
+        #glitch-btn {
+            position: absolute; bottom: 40px; right: 40px;
+            width: 25px; height: 25px; background: #ff4757; border: none; border-radius: 4px;
+            cursor: pointer; opacity: 0.5; display: none; z-index: 100;
+        }
+        #glitch-btn:hover { opacity: 1; transform: scale(1.2); }
+
+        /* --- THE VOID (JUMPSCARE) --- */
+        #void-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: black; display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 9999;
+        }
+
+        #void-screen img { 
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            object-fit: cover; z-index: -1; 
+        }
+
+        #void-screen h1 { 
+            color: #ff0000; font-family: monospace; font-size: 3rem; 
+            letter-spacing: 10px; text-shadow: 0 0 20px black; 
+            margin: 0; text-align: center;
+        }
+
+        /* --- SHATTER EFFECT --- */
+        .shatter-active #page-theater, .shatter-active #page-selection { 
+            filter: blur(20px) brightness(0); 
+            transform: scale(1.5);
+            pointer-events: none;
+            transition: all 0.4s ease-in;
+        }
+
+        /* --- NAV & CURTAINS --- */
+        .brand-back { position: absolute; top: 40px; left: 40px; cursor: pointer; z-index: 110; }
+        .brand-icon { width: 60px; height: 60px; background: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
+        .brand-icon img { width: 65%; }
+        .curtain-track { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; display: flex; pointer-events: none; }
+        .curtain { width: 50.5%; height: 100%; background: var(--curtain-color); position: absolute; transition: transform 1.2s var(--bounce); }
+        .left-c { left: 0; transform: translateX(-100%); }
+        .right-c { right: 0; transform: translateX(100%); }
+        .active-transition .left-c, .active-transition .right-c { transform: translateX(0); pointer-events: auto; }
+    </style>
+</head>
+<body id="app-shell">
+
+    <main id="page-selection">
+        <img src="PartnerSphere.png" class="main-logo">
+        <div class="button-row">
+            <button class="sphere-btn" onclick="openSphere('CW')"><img src="CartoonyWorld.webp"></button>
+            <button class="sphere-btn" onclick="openSphere('TFE')"><img src="TFE.jpg"></button>
+            <button class="sphere-btn" onclick="openSphere('Noob')"><img src="NoobStudio.jpg"></button>
+            <button class="sphere-btn" onclick="openSphere('Skeptic')"><img src="SkepticStudio.jpg"></button>
+        </div>
+    </main>
+
+    <div class="curtain-track">
+        <div class="curtain left-c"></div>
+        <div class="curtain right-c"></div>
+    </div>
+
+    <section id="page-theater">
+        <div class="brand-back" onclick="closeSphere()"><div class="brand-icon"><img src="PartnerSphere.png"></div></div>
+        <a id="video-link" href="#" target="_blank" class="video-container"><div id="media-source"></div></a>
+        <button id="glitch-btn" onclick="handleGlitchClick()"></button>
+    </section>
+
+    <div id="void-screen">
+        <img src="Toby.gif">
+        <h1>there nothing here</h1>
+    </div>
+
+    <script>
+        const shell = document.getElementById('app-shell');
+        const media = document.getElementById('media-source');
+        const theater = document.getElementById('page-theater');
+        const link = document.getElementById('video-link');
+        const glitchBtn = document.getElementById('glitch-btn');
+        const voidScreen = document.getElementById('void-screen');
+        let isGlitched = false;
+
+        function openSphere(type) {
+            shell.classList.add('active-transition');
+            // Show red button only in CW if not already clicked
+            glitchBtn.style.display = (type === 'CW' && !isGlitched) ? 'block' : 'none';
+
+            setTimeout(() => {
+                let finalImg = "";
+                if (type === 'CW') {
+                    theater.style.background = "radial-gradient(circle at center, #2d243a 0%, #0b090f 100%)";
+                    link.href = "https://www.youtube.com/watch?v=7kl4QR1K-io&list=PLap4_YRtlgrJgasngoXqh_p_1GfnPIrWh";
+                    finalImg = "CW.jpg";
+                } else if (type === 'TFE') {
+                    theater.style.background = "radial-gradient(circle at center, #1a1a1a 0%, #000000 100%)";
+                    link.href = "https://www.youtube.com/watch?v=t85KIXEVDis";
+                    finalImg = "TFE.jpg";
+                } else if (type === 'Noob') {
+                    theater.style.background = "radial-gradient(circle at center, #ffde59 0%, #ccae2b 100%)";
+                    link.href = "https://www.youtube.com/watch?v=IpW7MbeU7lk";
+                    finalImg = "NoobStudio.jpg";
+                } else if (type === 'Skeptic') {
+                    theater.style.background = "radial-gradient(circle at center, #004d4d 0%, #000000 100%)";
+                    link.href = "https://www.youtube.com/watch?v=73vRjIoIk54&t=44s";
+                    finalImg = "TADP.jpg";
+                }
+
+                shell.classList.add('is-theater-active');
+                setTimeout(() => {
+                    shell.classList.remove('active-transition');
+                    setTimeout(() => {
+                        if(shell.classList.contains('is-theater-active')) {
+                            media.style.backgroundImage = `url('${finalImg}')`;
+                        }
+                    }, 2000);
+                }, 150);
+            }, 1000);
+        }
+
+        function closeSphere() {
+            shell.classList.add('active-transition');
+            setTimeout(() => {
+                shell.classList.remove('is-theater-active');
+                media.style.backgroundImage = "url('Static.gif')";
+                setTimeout(() => { shell.classList.remove('active-transition'); }, 150);
+            }, 1000);
+        }
+
+        function handleGlitchClick() {
+            isGlitched = true;
+            glitchBtn.style.display = 'none';
+
+            // 1. Immediately start the shatter/blur of the menu
+            document.body.classList.add('shatter-active');
+
+            // 2. Show the jumpscare screen instantly
+            voidScreen.style.display = 'flex';
+
+            // 3. Keep it for 0.5 seconds then reset
+            setTimeout(() => {
+                voidScreen.style.display = 'none';
+                document.body.classList.remove('shatter-active');
+                closeSphere(); // Kicks you back to the main logo
+            }, 500);
+        }
+    </script>
+</body>
+</html>
